@@ -21,7 +21,7 @@ func generateRandomElements(size int) []int {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
-		data[i] = r.Intn(100000000)
+		data[i] = r.Int()
 	}
 	return data
 }
@@ -50,38 +50,22 @@ func maxChunks(data []int) int {
 	chunkSize := len(data) / CHUNKS
 	res := make([]int, CHUNKS)
 	var wg sync.WaitGroup
-	var mu sync.Mutex
-
-	rem := len(data) % CHUNKS
 
 	wg.Add(CHUNKS)
 	for i := 0; i < CHUNKS; i++ {
-		go func(chunkInd int) {
+		start := i * chunkSize
+		end := start + chunkSize
+		if i == CHUNKS-1 {
+			end = len(data)
+		}
+
+		chunk := data[start:end]
+
+		go func(chunk []int, index int) {
 			defer wg.Done()
 
-			start := chunkInd * chunkSize
-			end := start + chunkSize
-
-			if chunkInd == CHUNKS-1 && rem > 0 {
-				end += rem
-			}
-
-			chunk := data[start:end]
-			if len(chunk) == 0 {
-				return
-			}
-
-			chunkMax := chunk[0]
-			for j := 1; j < len(chunk); j++ {
-				if chunk[j] > chunkMax {
-					chunkMax = chunk[j]
-				}
-			}
-
-			mu.Lock()
-			res[chunkInd] = chunkMax
-			mu.Unlock()
-		}(i)
+			res[index] = maximum(chunk)
+		}(chunk, i)
 	}
 	wg.Wait()
 
@@ -92,11 +76,6 @@ func main() {
 	fmt.Printf("Генерируем %d целых чисел", SIZE)
 
 	data := generateRandomElements(SIZE)
-
-	if len(data) == 0 {
-		fmt.Println("Ошибка: массив пустой")
-		return
-	}
 
 	fmt.Println("\nИщем максимальное значение в один поток")
 

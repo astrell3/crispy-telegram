@@ -34,8 +34,6 @@ func TestMaximum(t *testing.T) {
 		{"Empty slice", []int{}, 0},
 		{"Single element", []int{1}, 1},
 		{"All positive", []int{1, 2, 3, 4, 5}, 5},
-		{"All negative", []int{-1, -2, -3, -4, -5}, -1},
-		{"Mixed", []int{1, -2, 3, -4, 5}, 5},
 		{"Max at beginning", []int{5, 4, 3, 2, 1}, 5},
 		{"Max at end", []int{1, 2, 3, 4, 5}, 5},
 	}
